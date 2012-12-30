@@ -14,16 +14,37 @@
 
 @implementation MCViewController
 
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-	// Do any additional setup after loading the view, typically from a nib.
-}
-
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+- (IBAction)open:(id)sender {
+//    MCFilteredPeoplePickerTableViewController *tvc = [[MCFilteredPeoplePickerTableViewController alloc] init];
+    MCFilteredPeoplePickerNavigationController *nc = [[MCFilteredPeoplePickerNavigationController alloc] init];
+    [nc setPeoplePickerDelegate:self];
+    [self presentViewController:nc animated:YES completion:^{    }];
+}
+
+#pragma mark MCFilteredPickerNavigationControllerDelegate
+
+- (BOOL)peoplePickerNavigationController:(MCFilteredPeoplePickerNavigationController *)peoplePicker shouldContinueAfterSelectingPerson:(ABRecordRef)person
+{
+    NSLog(@"selected: %@", person);
+    [peoplePicker dismissViewControllerAnimated:YES completion:^{
+        
+    }];
+    return NO;
+}
+
+- (BOOL)peoplePickerNavigationController:(MCFilteredPeoplePickerNavigationController *)peoplePicker shouldContinueAfterSelectingPerson:(ABRecordRef)person property:(ABPropertyID)property identifier:(ABMultiValueIdentifier)identifier
+{
+    NSLog(@"selected address: %@", person);
+    [peoplePicker dismissViewControllerAnimated:YES completion:^{
+        
+    }];
+    return NO;
 }
 
 @end

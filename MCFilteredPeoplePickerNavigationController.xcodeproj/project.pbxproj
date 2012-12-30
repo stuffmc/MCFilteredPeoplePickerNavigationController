@@ -24,6 +24,16 @@
 		4CA96548168FABCB008BB384 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CA96520168FABCB008BB384 /* Foundation.framework */; };
 		4CA96550168FABCB008BB384 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4CA9654E168FABCB008BB384 /* InfoPlist.strings */; };
 		4CA96553168FABCB008BB384 /* MCFilteredPeoplePickerNavigationControllerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA96552168FABCB008BB384 /* MCFilteredPeoplePickerNavigationControllerTests.m */; };
+		4CA9655D168FAC47008BB384 /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CA9655C168FAC47008BB384 /* AddressBook.framework */; };
+		4CA96561168FACCA008BB384 /* MCFilteredPeoplePickerTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA96560168FACCA008BB384 /* MCFilteredPeoplePickerTableViewController.m */; };
+		4CA96562168FACCA008BB384 /* MCFilteredPeoplePickerTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA96560168FACCA008BB384 /* MCFilteredPeoplePickerTableViewController.m */; };
+		4CA96565168FB443008BB384 /* MCFilteredPeoplePickerNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA96564168FB443008BB384 /* MCFilteredPeoplePickerNavigationController.m */; };
+		4CA96566168FB443008BB384 /* MCFilteredPeoplePickerNavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4CA96564168FB443008BB384 /* MCFilteredPeoplePickerNavigationController.m */; };
+		4CA9656A168FB6E9008BB384 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4CA9656D168FB6E9008BB384 /* Localizable.strings */; };
+		4CA9656B168FB6E9008BB384 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4CA9656D168FB6E9008BB384 /* Localizable.strings */; };
+		4CA96570168FB909008BB384 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 4CA9656F168FB909008BB384 /* README.md */; };
+		4CA96571168FB909008BB384 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 4CA9656F168FB909008BB384 /* README.md */; };
+		4CA96573168FBA37008BB384 /* AddressBookUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CA96572168FBA37008BB384 /* AddressBookUI.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +70,15 @@
 		4CA9654F168FABCB008BB384 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		4CA96551168FABCB008BB384 /* MCFilteredPeoplePickerNavigationControllerTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MCFilteredPeoplePickerNavigationControllerTests.h; sourceTree = "<group>"; };
 		4CA96552168FABCB008BB384 /* MCFilteredPeoplePickerNavigationControllerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MCFilteredPeoplePickerNavigationControllerTests.m; sourceTree = "<group>"; };
+		4CA9655C168FAC47008BB384 /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
+		4CA9655F168FACCA008BB384 /* MCFilteredPeoplePickerTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCFilteredPeoplePickerTableViewController.h; sourceTree = "<group>"; };
+		4CA96560168FACCA008BB384 /* MCFilteredPeoplePickerTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCFilteredPeoplePickerTableViewController.m; sourceTree = "<group>"; };
+		4CA96563168FB421008BB384 /* MCFilteredPeoplePickerNavigationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCFilteredPeoplePickerNavigationController.h; sourceTree = "<group>"; };
+		4CA96564168FB443008BB384 /* MCFilteredPeoplePickerNavigationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCFilteredPeoplePickerNavigationController.m; sourceTree = "<group>"; };
+		4CA9656C168FB6E9008BB384 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		4CA9656E168FB705008BB384 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
+		4CA9656F168FB909008BB384 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
+		4CA96572168FBA37008BB384 /* AddressBookUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBookUI.framework; path = System/Library/Frameworks/AddressBookUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +86,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CA96573168FBA37008BB384 /* AddressBookUI.framework in Frameworks */,
+				4CA9655D168FAC47008BB384 /* AddressBook.framework in Frameworks */,
 				4CA9651F168FABCB008BB384 /* UIKit.framework in Frameworks */,
 				4CA96521168FABCB008BB384 /* Foundation.framework in Frameworks */,
 				4CA96523168FABCB008BB384 /* CoreGraphics.framework in Frameworks */,
@@ -89,6 +110,8 @@
 		4CA9650F168FABCB008BB384 = {
 			isa = PBXGroup;
 			children = (
+				4CA9656F168FB909008BB384 /* README.md */,
+				4CA9655E168FAC8D008BB384 /* Source */,
 				4CA96524168FABCB008BB384 /* MCFilteredPeoplePickerNavigationController */,
 				4CA9654B168FABCB008BB384 /* MCFilteredPeoplePickerNavigationControllerTests */,
 				4CA9651D168FABCB008BB384 /* Frameworks */,
@@ -108,6 +131,8 @@
 		4CA9651D168FABCB008BB384 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4CA9655C168FAC47008BB384 /* AddressBook.framework */,
+				4CA96572168FBA37008BB384 /* AddressBookUI.framework */,
 				4CA9651E168FABCB008BB384 /* UIKit.framework */,
 				4CA96520168FABCB008BB384 /* Foundation.framework */,
 				4CA96522168FABCB008BB384 /* CoreGraphics.framework */,
@@ -161,6 +186,18 @@
 				4CA9654E168FABCB008BB384 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		4CA9655E168FAC8D008BB384 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				4CA9655F168FACCA008BB384 /* MCFilteredPeoplePickerTableViewController.h */,
+				4CA96560168FACCA008BB384 /* MCFilteredPeoplePickerTableViewController.m */,
+				4CA96563168FB421008BB384 /* MCFilteredPeoplePickerNavigationController.h */,
+				4CA96564168FB443008BB384 /* MCFilteredPeoplePickerNavigationController.m */,
+				4CA9656D168FB6E9008BB384 /* Localizable.strings */,
+			);
+			path = Source;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -218,6 +255,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				de,
 			);
 			mainGroup = 4CA9650F168FABCB008BB384;
 			productRefGroup = 4CA9651B168FABCB008BB384 /* Products */;
@@ -241,6 +279,8 @@
 				4CA96535168FABCB008BB384 /* Default-568h@2x.png in Resources */,
 				4CA96538168FABCB008BB384 /* MainStoryboard_iPhone.storyboard in Resources */,
 				4CA9653B168FABCB008BB384 /* MainStoryboard_iPad.storyboard in Resources */,
+				4CA9656A168FB6E9008BB384 /* Localizable.strings in Resources */,
+				4CA96570168FB909008BB384 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,6 +289,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				4CA96550168FABCB008BB384 /* InfoPlist.strings in Resources */,
+				4CA9656B168FB6E9008BB384 /* Localizable.strings in Resources */,
+				4CA96571168FB909008BB384 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -278,6 +320,8 @@
 				4CA9652B168FABCB008BB384 /* main.m in Sources */,
 				4CA9652F168FABCB008BB384 /* MCAppDelegate.m in Sources */,
 				4CA9653E168FABCB008BB384 /* MCViewController.m in Sources */,
+				4CA96561168FACCA008BB384 /* MCFilteredPeoplePickerTableViewController.m in Sources */,
+				4CA96565168FB443008BB384 /* MCFilteredPeoplePickerNavigationController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -286,6 +330,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				4CA96553168FABCB008BB384 /* MCFilteredPeoplePickerNavigationControllerTests.m in Sources */,
+				4CA96562168FACCA008BB384 /* MCFilteredPeoplePickerTableViewController.m in Sources */,
+				4CA96566168FB443008BB384 /* MCFilteredPeoplePickerNavigationController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -330,6 +376,15 @@
 				4CA9654F168FABCB008BB384 /* en */,
 			);
 			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		4CA9656D168FB6E9008BB384 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4CA9656C168FB6E9008BB384 /* en */,
+				4CA9656E168FB705008BB384 /* de */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

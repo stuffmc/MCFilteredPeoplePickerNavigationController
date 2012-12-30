@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MCFilteredPeoplePickerNavigationController.h"
 
-@interface MCViewController : UIViewController
+@interface MCViewController : UIViewController <MCFilteredPickerNavigationControllerDelegate>
 
 @end
