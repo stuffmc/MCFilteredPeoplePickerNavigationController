@@ -54,15 +54,13 @@
         // Inspired from http://developer.apple.com/library/ios/#documentation/ContactData/Conceptual/AddressBookProgrammingGuideforiPhone/Chapters/DirectInteraction.html#//apple_ref/doc/uid/TP40007744-CH6-SW1
         
         NSPredicate* predicate = [NSPredicate predicateWithBlock: ^(id record, NSDictionary* bindings) {
-//            ABMultiValueRef addresses = ABRecordCopyValue( (__bridge ABRecordRef)record, kABPersonAddressProperty);
             ABMultiValueRef multiValue = [self multiValue:record];
             BOOL result = ABMultiValueGetCount(multiValue) > 0 ? YES : NO;
-            CFRelease(multiValue);
             return result;
         }];
         _people = [_people filteredArrayUsingPredicate:predicate];
     }
-    
+    CFRelease(ab);
 }
 
 - (void)didReceiveMemoryWarning
@@ -84,7 +82,9 @@
     [tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:CellIdentifier];
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
     ABRecordRef record = (__bridge ABRecordRef)(_people[indexPath.row]);
-    cell.textLabel.text = (__bridge NSString *)(ABRecordCopyCompositeName(record));
+    CFStringRef compositeName = ABRecordCopyCompositeName(record);
+    cell.textLabel.text = (__bridge NSString *)(compositeName);
+    CFRelease(compositeName);
     return cell;
 }
 

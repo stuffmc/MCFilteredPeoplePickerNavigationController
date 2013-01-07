@@ -19,10 +19,12 @@
 
 - (id)init
 {
-    _filteredPeoplePickerTableViewController = [[MCFilteredPeoplePickerTableViewController alloc] init];
-    _filteredPeoplePickerTableViewController.peoplePickerDelegate = self.peoplePickerDelegate;
-    _filteredPeoplePickerTableViewController.filteredPeoplePickerNavigationController = self;
-    if (self = [super initWithRootViewController:_filteredPeoplePickerTableViewController]) {
+    if ((self = [super init])) {
+        _filteredPeoplePickerTableViewController = [[MCFilteredPeoplePickerTableViewController alloc] init];
+        _filteredPeoplePickerTableViewController.peoplePickerDelegate = self.peoplePickerDelegate;
+        _filteredPeoplePickerTableViewController.filteredPeoplePickerNavigationController = self;
+        if (self = [super initWithRootViewController:_filteredPeoplePickerTableViewController]) {
+        }
     }
     return self;
 }
