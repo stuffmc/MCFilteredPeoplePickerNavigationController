@@ -11,9 +11,14 @@
 
 @interface MCFilteredPeoplePickerTableViewController ()
 
-@property (strong, nonatomic) NSArray *people;
+@property (strong, nonatomic) NSArray *people, *searchedPeople;
+//@property (strong, nonatomic) NSMutableArray *searchedPeople;
+@property (strong, nonatomic) UISearchBar *searchBar;
+@property (nonatomic, strong) UISearchDisplayController * mySearchDisplayController;
 
 @end
+
+#define CELL @"Cell"
 
 @implementation MCFilteredPeoplePickerTableViewController
 
@@ -34,15 +39,12 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-
+    
     self.title = NSLocalizedString(@"contacts", @"The title 'Contacts' on top of the Table View");
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.navigationController action:@selector(dismiss)];
     
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
- 
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 0, self.tableView.frame.size.width, 44)];
+    self.searchBar.showsCancelButton = YES;
     
     CFErrorRef *error = nil;
     ABAddressBookRef ab = ABAddressBookCreateWithOptions(NULL, error);
@@ -73,60 +75,39 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return [_people count];
+    return [[self arrayForTableView:tableView] count];
+}
+
+- (NSArray*)arrayForTableView:(UITableView*)tableView
+{
+    return (tableView == self.tableView) ? _people : _searchedPeople;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    static NSString *CellIdentifier = @"Cell";
-    [tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:CellIdentifier];
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
-    ABRecordRef record = (__bridge ABRecordRef)(_people[indexPath.row]);
+//    DLogV(tableView);
+    [tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:CELL];
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CELL forIndexPath:indexPath];
+    ABRecordRef record = (__bridge ABRecordRef)([self arrayForTableView:tableView][indexPath.row]);
     CFStringRef compositeName = ABRecordCopyCompositeName(record);
     cell.textLabel.text = (__bridge NSString *)(compositeName);
     CFRelease(compositeName);
     return cell;
 }
 
-/*
-// Override to support conditional editing of the table view.
-- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+- (UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-    // Return NO if you do not want the specified item to be editable.
-    return YES;
+    self.mySearchDisplayController = [[UISearchDisplayController alloc] initWithSearchBar:self.searchBar contentsController:self];
+    self.mySearchDisplayController.searchResultsDelegate = self;
+    self.mySearchDisplayController.searchResultsDataSource = self;
+    self.mySearchDisplayController.delegate = self;
+    return self.searchBar;
 }
-*/
 
-/*
-// Override to support editing the table view.
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-    if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
-    }   
- 
-    else if (editingStyle == UITableViewCellEditingStyleInsert) {
-        // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
+    return self.searchBar.frame.size.height;
 }
-*/
-
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
-{
-}
-*/
-
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
-}
-*/
 
 #pragma mark - Table view delegate
 
@@ -163,6 +144,35 @@
 - (BOOL)personViewController:(ABPersonViewController *)personViewController shouldPerformDefaultActionForPerson:(ABRecordRef)person property:(ABPropertyID)property identifier:(ABMultiValueIdentifier)identifier
 {
     return [[self peoplePickerDelegate] peoplePickerNavigationController:self.filteredPeoplePickerNavigationController shouldContinueAfterSelectingPerson:person property:property identifier:identifier];
+}
+
+
+#pragma mark - UISearchDisplayDelegate
+
+- (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
+{
+//    _searchedPeople = [NSMutableArray array];
+    
+    NSPredicate* predicate = [NSPredicate predicateWithBlock: ^(id record, NSDictionary* bindings) {
+        CFStringRef compositeNameRef = ABRecordCopyCompositeName((__bridge ABRecordRef)record);
+        BOOL result = [(__bridge NSString *)compositeNameRef rangeOfString:[searchString uppercaseString]].location != NSNotFound;
+        CFRelease(compositeNameRef);
+        return result;
+    }];
+    _searchedPeople = [_people filteredArrayUsingPredicate:predicate];
+
+    
+//    _searchedPeople = [NSMutableArray array];
+//    [_people enumerateObjectsUsingBlock:^(id record, NSUInteger idx, BOOL *stop) {
+//        CFStringRef compositeNameRef = ABRecordCopyCompositeName((__bridge ABRecordRef)record);
+//        NSRange range = [(__bridge NSString *)compositeNameRef rangeOfString:searchString];
+//        if (range.location != NSNotFound) {
+//            [_searchedPeople addObject:record];
+//        }
+//        CFRelease(compositeNameRef);
+//    }];
+    
+    return YES;
 }
 
 
