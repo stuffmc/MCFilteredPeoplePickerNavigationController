@@ -17,16 +17,18 @@
 
 @implementation MCFilteredPeoplePickerNavigationController
 
-- (id)init
+- (id)initWithDelegate:(id<MCFilteredPickerNavigationControllerDelegate>)peoplePickerDelegate
 {
-    if ((self = [super init])) {
-        _filteredPeoplePickerTableViewController = [[MCFilteredPeoplePickerTableViewController alloc] init];
-        _filteredPeoplePickerTableViewController.peoplePickerDelegate = self.peoplePickerDelegate;
-        _filteredPeoplePickerTableViewController.filteredPeoplePickerNavigationController = self;
-        if (self = [super initWithRootViewController:_filteredPeoplePickerTableViewController]) {
+    self.filteredPeoplePickerTableViewController = [[MCFilteredPeoplePickerTableViewController alloc] init];
+    if (self.filteredPeoplePickerTableViewController) {
+        if ((self = [super initWithRootViewController:self.filteredPeoplePickerTableViewController])) {
+            self.filteredPeoplePickerTableViewController.peoplePickerDelegate = peoplePickerDelegate;
+            self.filteredPeoplePickerTableViewController.filteredPeoplePickerNavigationController = self;
         }
+        return self;
+    } else {
+        return nil;
     }
-    return self;
 }
 
 - (void)setPeoplePickerDelegate:(id<MCFilteredPickerNavigationControllerDelegate>)peoplePickerDelegate

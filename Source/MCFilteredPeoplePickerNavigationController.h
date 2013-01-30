@@ -14,6 +14,8 @@
 
 @property(nonatomic,assign)    id<MCFilteredPickerNavigationControllerDelegate>    peoplePickerDelegate;
 
+- (id)initWithDelegate:(id<MCFilteredPickerNavigationControllerDelegate>)peoplePickerDelegate;
+
 @end
 
 

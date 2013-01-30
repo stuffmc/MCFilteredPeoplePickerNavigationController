@@ -14,7 +14,7 @@
 
 @interface MCFilteredPeoplePickerTableViewController : UITableViewController <ABPersonViewControllerDelegate, UISearchDisplayDelegate>
 
-@property(nonatomic,assign)    id<MCFilteredPickerNavigationControllerDelegate>    peoplePickerDelegate;
+@property(nonatomic, assign)    id<MCFilteredPickerNavigationControllerDelegate>    peoplePickerDelegate;
 @property(nonatomic, strong) MCFilteredPeoplePickerNavigationController *filteredPeoplePickerNavigationController;
 
 @end

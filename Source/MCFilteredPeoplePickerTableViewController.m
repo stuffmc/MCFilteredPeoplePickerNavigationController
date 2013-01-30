@@ -12,7 +12,6 @@
 @interface MCFilteredPeoplePickerTableViewController ()
 
 @property (strong, nonatomic) NSArray *people, *searchedPeople;
-//@property (strong, nonatomic) NSMutableArray *searchedPeople;
 @property (strong, nonatomic) UISearchBar *searchBar;
 @property (nonatomic, strong) UISearchDisplayController * mySearchDisplayController;
 
@@ -26,7 +25,55 @@
 {
     self = [super initWithStyle:style];
     if (self) {
-        // Custom initialization
+        CFErrorRef *error = nil;
+        ABAddressBookRef ab = nil;
+        
+        // Thanks to http://mobileappsolutions.blogspot.de/2012/11/addressbook-ios-6-issues.html
+        // other option (not working): CFBundleGetFunctionPointerForName(CFBundleGetBundleWithIdentifier(CFSTR("com.apple.addressbook")), CFSTR("ABAddressBookRequestAccessWithCompletion"))
+        if (ABAddressBookCreateWithOptions != NULL) {   // we're on iOS 6
+            ab = ABAddressBookCreateWithOptions(NULL, error);
+            if (ABAddressBookGetAuthorizationStatus() == kABAuthorizationStatusNotDetermined) {
+                ABAddressBookRequestAccessWithCompletion(ab, ^(bool granted, CFErrorRef error) {
+                    // First time access has been granted, add the contact
+                    NSLog(@"granted: %i", granted);
+                    if (!granted) {
+                        // TODO: Dismiss
+                    }
+                    //                [self _addContactToAddressBook];
+                });
+            } else if (ABAddressBookGetAuthorizationStatus() == kABAuthorizationStatusAuthorized) {
+                // The user has previously given access, add the contact
+                //            [self _addContactToAddressBook];
+            } else {
+                // The user has previously denied access
+                // Send an alert telling user to change privacy setting in settings app
+                if (ab) {
+                    CFRelease(ab);
+                }
+                [UIAlertView showWithTitle:NSLocalizedString(@"user_rejected_access_to_addressbook", @"Message shown when the user has previously rejected access. He'll have to go in the settings.")];
+                return nil;
+            }
+        } else {    // we're on iOS 5
+            ab = ABAddressBookCreate();
+        }
+        if (error) {
+            NSLog(@"ABAddressBookCreateWithOptions returned error code %ld", CFErrorGetCode(*error));
+        } else {
+            _people = (__bridge NSArray*)ABAddressBookCopyArrayOfAllPeople(ab);
+            
+            // Inspired from http://developer.apple.com/library/ios/#documentation/ContactData/Conceptual/AddressBookProgrammingGuideforiPhone/Chapters/DirectInteraction.html#//apple_ref/doc/uid/TP40007744-CH6-SW1
+            
+            NSPredicate* predicate = [NSPredicate predicateWithBlock: ^(id record, NSDictionary* bindings) {
+                ABMultiValueRef multiValue = [self multiValue:record];
+                BOOL result = ABMultiValueGetCount(multiValue) > 0 ? YES : NO;
+                CFRelease(multiValue);
+                return result;
+            }];
+            _people = [_people filteredArrayUsingPredicate:predicate];
+        }
+        if (ab) {
+            CFRelease(ab);
+        }
     }
     return self;
 }
@@ -45,24 +92,6 @@
     
     self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 0, self.tableView.frame.size.width, 44)];
     self.searchBar.showsCancelButton = YES;
-    
-    CFErrorRef *error = nil;
-    ABAddressBookRef ab = ABAddressBookCreateWithOptions(NULL, error);
-    if (error) {
-        NSLog(@"ABAddressBookCreateWithOptions returned error code %ld", CFErrorGetCode(*error));
-    } else {
-        _people = (__bridge NSArray*)ABAddressBookCopyArrayOfAllPeople(ab);
-        
-        // Inspired from http://developer.apple.com/library/ios/#documentation/ContactData/Conceptual/AddressBookProgrammingGuideforiPhone/Chapters/DirectInteraction.html#//apple_ref/doc/uid/TP40007744-CH6-SW1
-        
-        NSPredicate* predicate = [NSPredicate predicateWithBlock: ^(id record, NSDictionary* bindings) {
-            ABMultiValueRef multiValue = [self multiValue:record];
-            BOOL result = ABMultiValueGetCount(multiValue) > 0 ? YES : NO;
-            return result;
-        }];
-        _people = [_people filteredArrayUsingPredicate:predicate];
-    }
-    CFRelease(ab);
 }
 
 - (void)didReceiveMemoryWarning
@@ -86,8 +115,9 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
 //    DLogV(tableView);
+    // TODO: Find another way: The following line will only work on iOS 6!
     [tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:CELL];
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CELL forIndexPath:indexPath];
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CELL];
     ABRecordRef record = (__bridge ABRecordRef)([self arrayForTableView:tableView][indexPath.row]);
     CFStringRef compositeName = ABRecordCopyCompositeName(record);
     cell.textLabel.text = (__bridge NSString *)(compositeName);
@@ -137,6 +167,7 @@
         }
             break;
     }
+    CFRelease(multiValue);
 }
 
 #pragma mark - ABPersonViewControllerDelegate
@@ -151,8 +182,6 @@
 
 - (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
 {
-//    _searchedPeople = [NSMutableArray array];
-    
     NSPredicate* predicate = [NSPredicate predicateWithBlock: ^(id record, NSDictionary* bindings) {
         CFStringRef compositeNameRef = ABRecordCopyCompositeName((__bridge ABRecordRef)record);
         BOOL result = [(__bridge NSString *)compositeNameRef rangeOfString:[searchString uppercaseString]].location != NSNotFound;
@@ -160,18 +189,6 @@
         return result;
     }];
     _searchedPeople = [_people filteredArrayUsingPredicate:predicate];
-
-    
-//    _searchedPeople = [NSMutableArray array];
-//    [_people enumerateObjectsUsingBlock:^(id record, NSUInteger idx, BOOL *stop) {
-//        CFStringRef compositeNameRef = ABRecordCopyCompositeName((__bridge ABRecordRef)record);
-//        NSRange range = [(__bridge NSString *)compositeNameRef rangeOfString:searchString];
-//        if (range.location != NSNotFound) {
-//            [_searchedPeople addObject:record];
-//        }
-//        CFRelease(compositeNameRef);
-//    }];
-    
     return YES;
 }
 
