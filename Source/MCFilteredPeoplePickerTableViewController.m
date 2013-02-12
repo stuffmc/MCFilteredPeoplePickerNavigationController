@@ -115,9 +115,10 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
 //    DLogV(tableView);
-    // TODO: Find another way: The following line will only work on iOS 6!
-    [tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:CELL];
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CELL];
+    if (!cell) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CELL];
+    }
     ABRecordRef record = (__bridge ABRecordRef)([self arrayForTableView:tableView][indexPath.row]);
     CFStringRef compositeName = ABRecordCopyCompositeName(record);
     cell.textLabel.text = (__bridge NSString *)(compositeName);
