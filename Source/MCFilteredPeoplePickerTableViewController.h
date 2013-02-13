@@ -12,7 +12,7 @@
 @protocol MCFilteredPickerNavigationControllerDelegate;
 #import "MCFilteredPeoplePickerNavigationController.h"
 
-@interface MCFilteredPeoplePickerTableViewController : UITableViewController <ABPersonViewControllerDelegate, UISearchDisplayDelegate>
+@interface MCFilteredPeoplePickerTableViewController : UITableViewController <ABPersonViewControllerDelegate, UISearchDisplayDelegate, UISearchBarDelegate>
 
 @property(nonatomic, assign)    id<MCFilteredPickerNavigationControllerDelegate>    peoplePickerDelegate;
 @property(nonatomic, strong) MCFilteredPeoplePickerNavigationController *filteredPeoplePickerNavigationController;

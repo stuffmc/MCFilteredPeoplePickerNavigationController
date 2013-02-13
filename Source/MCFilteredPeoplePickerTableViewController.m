@@ -75,10 +75,10 @@
     [super viewDidLoad];
     
     self.title = NSLocalizedString(@"loading_contacts", @"The title 'Loading Contacts...' on top of the Table View while loading the contacts");
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.navigationController action:@selector(dismiss)];
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.navigationController action:@selector(dismiss)];
     
     self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 0, self.tableView.frame.size.width, 44)];
-    self.searchBar.showsCancelButton = YES;
+    self.searchBar.delegate = self;
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -199,6 +199,21 @@
     }];
     _searchedPeople = [_people filteredArrayUsingPredicate:predicate];
     return YES;
+}
+
+#pragma mark - UISearchBarDelegate
+
+- (BOOL)searchBarShouldBeginEditing:(UISearchBar *)searchBar
+{
+    [self.searchBar setShowsCancelButton:YES animated:YES];
+    return YES;
+}
+
+
+- (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
+{
+    [self.searchBar setShowsCancelButton:NO animated:YES];
+    [searchBar resignFirstResponder];
 }
 
 
