@@ -65,20 +65,21 @@
     return self;
 }
 
-- (ABMultiValueRef)multiValue:(id)record
-{
-    return ABRecordCopyValue((__bridge ABRecordRef)record, kABPersonAddressProperty);
-}
+#pragma - View Life Cycle
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
     
     self.title = NSLocalizedString(@"loading_contacts", @"The title 'Loading Contacts...' on top of the Table View while loading the contacts");
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.navigationController action:@selector(dismiss)];
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.navigationController action:@selector(dismiss)];
     
     self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 0, self.tableView.frame.size.width, 44)];
-    self.searchBar.delegate = self;
+    self.mySearchDisplayController = [[UISearchDisplayController alloc] initWithSearchBar:self.searchBar contentsController:self];
+    self.mySearchDisplayController.searchResultsDelegate = self;
+    self.mySearchDisplayController.searchResultsDataSource = self;
+    self.mySearchDisplayController.delegate = self;
+    self.tableView.tableHeaderView = self.searchBar;
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -116,11 +117,6 @@
     return [[self arrayForTableView:tableView] count];
 }
 
-- (NSArray*)arrayForTableView:(UITableView*)tableView
-{
-    return (tableView == self.tableView) ? _people : _searchedPeople;
-}
-
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CELL];
@@ -132,20 +128,6 @@
     cell.textLabel.text = (__bridge NSString *)(compositeName);
     CFRelease(compositeName);
     return cell;
-}
-
-- (UIView*)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
-{
-    self.mySearchDisplayController = [[UISearchDisplayController alloc] initWithSearchBar:self.searchBar contentsController:self];
-    self.mySearchDisplayController.searchResultsDelegate = self;
-    self.mySearchDisplayController.searchResultsDataSource = self;
-    self.mySearchDisplayController.delegate = self;
-    return self.searchBar;
-}
-
-- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
-{
-    return self.searchBar.frame.size.height;
 }
 
 #pragma mark - Table view delegate
@@ -191,29 +173,33 @@
 
 - (BOOL)searchDisplayController:(UISearchDisplayController *)controller shouldReloadTableForSearchString:(NSString *)searchString
 {
+    [self search:searchString];
+    return YES;
+}
+
+#pragma mark - Private Methods
+
+- (ABMultiValueRef)multiValue:(id)record
+{
+    return ABRecordCopyValue((__bridge ABRecordRef)record, kABPersonAddressProperty);
+}
+
+- (NSArray*)arrayForTableView:(UITableView*)tableView
+{
+    return (tableView == self.tableView) ? _people : _searchedPeople;
+}
+
+- (void)search:(NSString *)searchString
+{
     NSPredicate* predicate = [NSPredicate predicateWithBlock: ^(id record, NSDictionary* bindings) {
         CFStringRef compositeNameRef = ABRecordCopyCompositeName((__bridge ABRecordRef)record);
-        BOOL result = [(__bridge NSString *)compositeNameRef rangeOfString:[searchString uppercaseString]].location != NSNotFound;
+        NSRange range = [(__bridge NSString *)compositeNameRef rangeOfString:searchString
+                                                                     options:NSCaseInsensitiveSearch | NSDiacriticInsensitiveSearch];
+        BOOL result = range.location != NSNotFound;
         CFRelease(compositeNameRef);
         return result;
     }];
     _searchedPeople = [_people filteredArrayUsingPredicate:predicate];
-    return YES;
-}
-
-#pragma mark - UISearchBarDelegate
-
-- (BOOL)searchBarShouldBeginEditing:(UISearchBar *)searchBar
-{
-    [self.searchBar setShowsCancelButton:YES animated:YES];
-    return YES;
-}
-
-
-- (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
-{
-    [self.searchBar setShowsCancelButton:NO animated:YES];
-    [searchBar resignFirstResponder];
 }
 
 
