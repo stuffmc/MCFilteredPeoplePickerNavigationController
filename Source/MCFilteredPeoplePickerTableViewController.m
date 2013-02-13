@@ -60,6 +60,8 @@
         }
         if (error) {
             NSLog(@"ABAddressBookCreateWithOptions returned error code %ld", CFErrorGetCode(*error));
+        } else {
+            [self loadContacts];
         }
     }
     return self;
@@ -80,28 +82,6 @@
     self.mySearchDisplayController.searchResultsDataSource = self;
     self.mySearchDisplayController.delegate = self;
     self.tableView.tableHeaderView = self.searchBar;
-}
-
-- (void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-    _people = (__bridge NSArray*)ABAddressBookCopyArrayOfAllPeople(ab);
-    
-    // Inspired from http://developer.apple.com/library/ios/#documentation/ContactData/Conceptual/AddressBookProgrammingGuideforiPhone/Chapters/DirectInteraction.html#//apple_ref/doc/uid/TP40007744-CH6-SW1
-    
-    NSPredicate* predicate = [NSPredicate predicateWithBlock: ^(id record, NSDictionary* bindings) {
-        ABMultiValueRef multiValue = [self multiValue:record];
-        BOOL result = ABMultiValueGetCount(multiValue) > 0 ? YES : NO;
-        CFRelease(multiValue);
-        return result;
-    }];
-    _people = [_people filteredArrayUsingPredicate:predicate];
-    [self.tableView reloadData];
-    if (ab) {
-        CFRelease(ab);
-    }
-
-    self.title = NSLocalizedString(@"contacts", @"The title 'Contacts' on top of the Table View once the contacts have been loaded");
 }
 
 - (void)didReceiveMemoryWarning
@@ -143,7 +123,7 @@
             NSLog(@"Something weird happened. This record you just clicked shouldn't happend — please report!");
             break;
 
-        case 1:
+        case 1: 
         {
             [self.peoplePickerDelegate peoplePickerNavigationController:self.filteredPeoplePickerNavigationController shouldContinueAfterSelectingPerson:recordRef];
         }
@@ -178,6 +158,28 @@
 }
 
 #pragma mark - Private Methods
+
+- (void)loadContacts
+{
+    dispatch_async(dispatch_queue_create("biz.pomcast.mcfilteredppnc.loading", NULL), ^{
+        _people = (__bridge NSArray*)ABAddressBookCopyArrayOfAllPeople(ab);        
+        // Inspired from http://developer.apple.com/library/ios/#documentation/ContactData/Conceptual/AddressBookProgrammingGuideforiPhone/Chapters/DirectInteraction.html#//apple_ref/doc/uid/TP40007744-CH6-SW1
+        NSPredicate* predicate = [NSPredicate predicateWithBlock: ^(id record, NSDictionary* bindings) {
+            ABMultiValueRef multiValue = [self multiValue:record];
+            BOOL result = ABMultiValueGetCount(multiValue) > 0 ? YES : NO;
+            CFRelease(multiValue);
+            return result;
+        }];
+        _people = [_people filteredArrayUsingPredicate:predicate];
+        if (ab) {
+            CFRelease(ab);
+        }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.tableView reloadData];
+            self.title = NSLocalizedString(@"contacts", @"The title 'Contacts' on top of the Table View once the contacts have been loaded");
+        });
+    });
+}
 
 - (ABMultiValueRef)multiValue:(id)record
 {
