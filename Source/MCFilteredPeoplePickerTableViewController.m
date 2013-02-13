@@ -19,14 +19,16 @@
 
 #define CELL @"Cell"
 
-@implementation MCFilteredPeoplePickerTableViewController
+@implementation MCFilteredPeoplePickerTableViewController {
+    ABAddressBookRef ab;
+}
 
 - (id)initWithStyle:(UITableViewStyle)style
 {
     self = [super initWithStyle:style];
     if (self) {
         CFErrorRef *error = nil;
-        ABAddressBookRef ab = nil;
+        ab = nil;
         
         // Thanks to http://mobileappsolutions.blogspot.de/2012/11/addressbook-ios-6-issues.html
         // other option (not working): CFBundleGetFunctionPointerForName(CFBundleGetBundleWithIdentifier(CFSTR("com.apple.addressbook")), CFSTR("ABAddressBookRequestAccessWithCompletion"))
@@ -58,21 +60,6 @@
         }
         if (error) {
             NSLog(@"ABAddressBookCreateWithOptions returned error code %ld", CFErrorGetCode(*error));
-        } else {
-            _people = (__bridge NSArray*)ABAddressBookCopyArrayOfAllPeople(ab);
-            
-            // Inspired from http://developer.apple.com/library/ios/#documentation/ContactData/Conceptual/AddressBookProgrammingGuideforiPhone/Chapters/DirectInteraction.html#//apple_ref/doc/uid/TP40007744-CH6-SW1
-            
-            NSPredicate* predicate = [NSPredicate predicateWithBlock: ^(id record, NSDictionary* bindings) {
-                ABMultiValueRef multiValue = [self multiValue:record];
-                BOOL result = ABMultiValueGetCount(multiValue) > 0 ? YES : NO;
-                CFRelease(multiValue);
-                return result;
-            }];
-            _people = [_people filteredArrayUsingPredicate:predicate];
-        }
-        if (ab) {
-            CFRelease(ab);
         }
     }
     return self;
@@ -87,11 +74,33 @@
 {
     [super viewDidLoad];
     
-    self.title = NSLocalizedString(@"contacts", @"The title 'Contacts' on top of the Table View");
+    self.title = NSLocalizedString(@"loading_contacts", @"The title 'Loading Contacts...' on top of the Table View while loading the contacts");
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCancel target:self.navigationController action:@selector(dismiss)];
     
     self.searchBar = [[UISearchBar alloc] initWithFrame:CGRectMake(0, 0, self.tableView.frame.size.width, 44)];
     self.searchBar.showsCancelButton = YES;
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    _people = (__bridge NSArray*)ABAddressBookCopyArrayOfAllPeople(ab);
+    
+    // Inspired from http://developer.apple.com/library/ios/#documentation/ContactData/Conceptual/AddressBookProgrammingGuideforiPhone/Chapters/DirectInteraction.html#//apple_ref/doc/uid/TP40007744-CH6-SW1
+    
+    NSPredicate* predicate = [NSPredicate predicateWithBlock: ^(id record, NSDictionary* bindings) {
+        ABMultiValueRef multiValue = [self multiValue:record];
+        BOOL result = ABMultiValueGetCount(multiValue) > 0 ? YES : NO;
+        CFRelease(multiValue);
+        return result;
+    }];
+    _people = [_people filteredArrayUsingPredicate:predicate];
+    [self.tableView reloadData];
+    if (ab) {
+        CFRelease(ab);
+    }
+
+    self.title = NSLocalizedString(@"contacts", @"The title 'Contacts' on top of the Table View once the contacts have been loaded");
 }
 
 - (void)didReceiveMemoryWarning
@@ -114,7 +123,6 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-//    DLogV(tableView);
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CELL];
     if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CELL];
