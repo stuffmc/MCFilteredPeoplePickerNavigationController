@@ -122,13 +122,13 @@
             // That shouldn't happen, actually!
             NSLog(@"Something weird happened. This record you just clicked shouldn't happend — please report!");
             break;
-
-        case 1: 
+            
+        case 1:
         {
             [self.peoplePickerDelegate peoplePickerNavigationController:self.filteredPeoplePickerNavigationController shouldContinueAfterSelectingPerson:recordRef];
         }
             break;
-
+            
         default:
         {
             ABPersonViewController *personViewController = [[ABPersonViewController alloc] init];
@@ -162,7 +162,8 @@
 - (void)loadContacts
 {
     dispatch_async(dispatch_queue_create("biz.pomcast.mcfilteredppnc.loading", NULL), ^{
-        _people = (__bridge NSArray*)ABAddressBookCopyArrayOfAllPeople(ab);        
+        _people = (__bridge NSArray*)ABAddressBookCopyArrayOfAllPeople(ab);
+        [self logPeople];
         // Inspired from http://developer.apple.com/library/ios/#documentation/ContactData/Conceptual/AddressBookProgrammingGuideforiPhone/Chapters/DirectInteraction.html#//apple_ref/doc/uid/TP40007744-CH6-SW1
         NSPredicate* predicate = [NSPredicate predicateWithBlock: ^(id record, NSDictionary* bindings) {
             ABMultiValueRef multiValue = [self multiValue:record];
@@ -171,6 +172,12 @@
             return result;
         }];
         _people = [_people filteredArrayUsingPredicate:predicate];
+        
+        // Sorting. We might make this an option or only sort if there is less than X contacts...
+        _people = [_people sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+            return [(__bridge NSString*)ABRecordCopyCompositeName((__bridge ABRecordRef) obj1) compare:(__bridge NSString*)ABRecordCopyCompositeName((__bridge ABRecordRef)obj2)];
+        }];
+        [self logPeople];
         if (ab) {
             CFRelease(ab);
         }
@@ -179,6 +186,17 @@
             self.title = NSLocalizedString(@"contacts", @"The title 'Contacts' on top of the Table View once the contacts have been loaded");
         });
     });
+}
+
+- (void)logPeople
+{
+#ifdef DEBUG
+#if 0 && TARGET_IPHONE_SIMULATOR
+    [_people enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        DLogV((__bridge NSString*)ABRecordCopyCompositeName((__bridge ABRecordRef)(_people[idx])));
+    }];
+#endif
+#endif
 }
 
 - (ABMultiValueRef)multiValue:(id)record
