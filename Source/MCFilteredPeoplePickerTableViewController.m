@@ -114,7 +114,8 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    id record = _people[indexPath.row];
+    id record = _searchedPeople ? _searchedPeople[indexPath.row] : _people[indexPath.row];
+    _searchedPeople = nil;
     ABMultiValueRef multiValue = [self multiValue:record];
     ABRecordRef recordRef = (__bridge ABRecordRef)record;
     switch (ABMultiValueGetCount(multiValue)) {
