@@ -116,7 +116,7 @@
 {
     id record = _searchedPeople ? _searchedPeople[indexPath.row] : _people[indexPath.row];
     _searchedPeople = nil;
-    ABMultiValueRef multiValue = [self multiValue:record];
+    ABMultiValueRef multiValue = ABRecordCopyValue((__bridge ABRecordRef)record, kABPersonAddressProperty);
     ABRecordRef recordRef = (__bridge ABRecordRef)record;
     switch (ABMultiValueGetCount(multiValue)) {
         case 0:
@@ -167,7 +167,7 @@
         [self logPeople];
         // Inspired from http://developer.apple.com/library/ios/#documentation/ContactData/Conceptual/AddressBookProgrammingGuideforiPhone/Chapters/DirectInteraction.html#//apple_ref/doc/uid/TP40007744-CH6-SW1
         NSPredicate* predicate = [NSPredicate predicateWithBlock: ^(id record, NSDictionary* bindings) {
-            ABMultiValueRef multiValue = [self multiValue:record];
+            ABMultiValueRef multiValue = ABRecordCopyValue((__bridge ABRecordRef)record, kABPersonAddressProperty);
             BOOL result = ABMultiValueGetCount(multiValue) > 0 ? YES : NO;
             CFRelease(multiValue);
             return result;
@@ -176,7 +176,14 @@
         
         // Sorting. We might make this an option or only sort if there is less than X contacts...
         _people = [_people sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
-            return [(__bridge NSString*)ABRecordCopyCompositeName((__bridge ABRecordRef) obj1) compare:(__bridge NSString*)ABRecordCopyCompositeName((__bridge ABRecordRef)obj2)];
+            CFStringRef obj1CF = ABRecordCopyCompositeName((__bridge ABRecordRef) obj1);
+            NSString* obj1String = (__bridge NSString*)obj1CF;
+            CFStringRef obj2CF = ABRecordCopyCompositeName((__bridge ABRecordRef) obj2);
+            NSString* obj2String = (__bridge NSString*)obj2CF;
+            NSComparisonResult comparisonResult = [obj1String compare:obj2String];
+            CFRelease(obj1CF);
+            CFRelease(obj2CF);
+            return comparisonResult;
         }];
         [self logPeople];
         if (ab) {
@@ -200,11 +207,6 @@
 #endif
 }
 
-- (ABMultiValueRef)multiValue:(id)record
-{
-    return ABRecordCopyValue((__bridge ABRecordRef)record, kABPersonAddressProperty);
-}
-
 - (NSArray*)arrayForTableView:(UITableView*)tableView
 {
     return (tableView == self.tableView) ? _people : _searchedPeople;
@@ -223,5 +225,11 @@
     _searchedPeople = [_people filteredArrayUsingPredicate:predicate];
 }
 
+- (void)dealloc
+{
+    self.people = nil;
+    self.searchedPeople = nil;
+    CFRelease(ab);
+}
 
 @end
