@@ -38,20 +38,19 @@
                 ABAddressBookRequestAccessWithCompletion(ab, ^(bool granted, CFErrorRef error) {
                     // First time access has been granted, add the contact
                     NSLog(@"granted: %i", granted);
-                    if (!granted) {
-                        // TODO: Dismiss
+                    if (granted) {
+                        // Refreshing.
+                        [self loadContacts];
                     }
-                    //                [self _addContactToAddressBook];
                 });
             } else if (ABAddressBookGetAuthorizationStatus() == kABAuthorizationStatusAuthorized) {
                 // The user has previously given access, add the contact
-                //            [self _addContactToAddressBook];
             } else {
                 // The user has previously denied access
                 // Send an alert telling user to change privacy setting in settings app
-                if (ab) {
-                    CFRelease(ab);
-                }
+//                if (ab) {
+//                    CFRelease(ab);
+//                }
                 [UIAlertView showWithTitle:NSLocalizedString(@"user_rejected_access_to_addressbook", @"Message shown when the user has previously rejected access. He'll have to go in the settings.")];
                 return nil;
             }
@@ -186,9 +185,9 @@
             return comparisonResult;
         }];
         [self logPeople];
-        if (ab) {
-            CFRelease(ab);
-        }
+//        if (ab) {
+//            CFRelease(ab);
+//        }
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.tableView reloadData];
             self.title = NSLocalizedString(@"contacts", @"The title 'Contacts' on top of the Table View once the contacts have been loaded");
@@ -229,7 +228,9 @@
 {
     self.people = nil;
     self.searchedPeople = nil;
-    CFRelease(ab);
+    if (ab) {
+        CFRelease(ab);
+    }
 }
 
 @end
