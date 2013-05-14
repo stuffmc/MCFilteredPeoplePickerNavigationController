@@ -134,6 +134,7 @@
             ABPersonViewController *personViewController = [[ABPersonViewController alloc] init];
             [personViewController setPersonViewDelegate:self];
             [personViewController setDisplayedPerson:recordRef];
+            [personViewController setDisplayedProperties:@[@(kABPersonAddressProperty)]];
             [self.navigationController pushViewController:personViewController animated:YES];
         }
             break;
