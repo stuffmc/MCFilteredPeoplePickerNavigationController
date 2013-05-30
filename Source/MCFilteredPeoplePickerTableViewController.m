@@ -48,9 +48,6 @@
             } else {
                 // The user has previously denied access
                 // Send an alert telling user to change privacy setting in settings app
-//                if (ab) {
-//                    CFRelease(ab);
-//                }
                 [UIAlertView showWithTitle:NSLocalizedString(@"user_rejected_access_to_addressbook", @"Message shown when the user has previously rejected access. He'll have to go in the settings.")];
                 return nil;
             }
@@ -118,33 +115,42 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    id record = _searchedPeople ? _searchedPeople[indexPath.row] : _people[indexPath.row];
-    _searchedPeople = nil;
-    ABMultiValueRef multiValue = ABRecordCopyValue((__bridge ABRecordRef)record, kABPersonAddressProperty);
-    ABRecordRef recordRef = (__bridge ABRecordRef)record;
-    switch (ABMultiValueGetCount(multiValue)) {
-        case 0:
-            // That shouldn't happen, actually!
-            NSLog(@"Something weird happened. This record you just clicked shouldn't happend — please report!");
-            break;
-            
-        case 1:
-        {
-            [self.peoplePickerDelegate peoplePickerNavigationController:self.filteredPeoplePickerNavigationController shouldContinueAfterSelectingPerson:recordRef];
-        }
-            break;
-            
-        default:
-        {
-            ABPersonViewController *personViewController = [[ABPersonViewController alloc] init];
-            [personViewController setPersonViewDelegate:self];
-            [personViewController setDisplayedPerson:recordRef];
-            [personViewController setDisplayedProperties:@[@(kABPersonAddressProperty)]];
-            [self.navigationController pushViewController:personViewController animated:YES];
-        }
-            break;
+    id record = nil;
+    if (_searchedPeople && _searchedPeople.count > indexPath.row) {
+        record = _searchedPeople[indexPath.row];
+    } else if (_people.count > indexPath.row) {
+        record = _people[indexPath.row];
     }
-    CFRelease(multiValue);
+    _searchedPeople = nil;
+    if (record) {
+        ABMultiValueRef multiValue = ABRecordCopyValue((__bridge ABRecordRef)record, kABPersonAddressProperty);
+        ABRecordRef recordRef = (__bridge ABRecordRef)record;
+        switch (ABMultiValueGetCount(multiValue)) {
+            case 0:
+                // That shouldn't happen, actually!
+                NSLog(@"Something weird happened. This record you just clicked shouldn't happend — please report!");
+                break;
+                
+            case 1:
+            {
+                [self.peoplePickerDelegate peoplePickerNavigationController:self.filteredPeoplePickerNavigationController shouldContinueAfterSelectingPerson:recordRef];
+            }
+                break;
+                
+            default:
+            {
+                ABPersonViewController *personViewController = [[ABPersonViewController alloc] init];
+                [personViewController setPersonViewDelegate:self];
+                [personViewController setDisplayedPerson:recordRef];
+                [personViewController setDisplayedProperties:@[@(kABPersonAddressProperty)]];
+                [self.navigationController pushViewController:personViewController animated:YES];
+            }
+                break;
+        }
+        CFRelease(multiValue);
+    } else {
+        DLogI(indexPath.row); // Hint to the developer that something wrong happened.
+    }
 }
 
 #pragma mark - ABPersonViewControllerDelegate
@@ -191,9 +197,6 @@
             return comparisonResult;
         }];
         [self logPeople];
-//        if (ab) {
-//            CFRelease(ab);
-//        }
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.tableView reloadData];
             self.title = NSLocalizedString(@"contacts", @"The title 'Contacts' on top of the Table View once the contacts have been loaded");
