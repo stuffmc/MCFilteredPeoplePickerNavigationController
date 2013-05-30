@@ -102,10 +102,15 @@
     if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CELL];
     }
-    ABRecordRef record = (__bridge ABRecordRef)([self arrayForTableView:tableView][indexPath.row]);
-    CFStringRef compositeName = ABRecordCopyCompositeName(record);
-    cell.textLabel.text = (__bridge NSString *)(compositeName);
-    CFRelease(compositeName);
+    NSArray *array = [self arrayForTableView:tableView];
+    if (array.count > indexPath.row) {
+        ABRecordRef record = (__bridge ABRecordRef)(array[indexPath.row]);
+        CFStringRef compositeName = ABRecordCopyCompositeName(record);
+        cell.textLabel.text = (__bridge NSString *)(compositeName);
+        CFRelease(compositeName);
+    } else {
+        cell.textLabel.text = @""; // This shouldn't happen, but if it does, at least we don't crash.
+    }
     return cell;
 }
 
