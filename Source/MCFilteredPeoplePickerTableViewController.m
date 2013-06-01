@@ -174,7 +174,9 @@
 - (void)loadContacts
 {
     dispatch_async(dispatch_queue_create("biz.pomcast.mcfilteredppnc.loading", NULL), ^{
-        _people = (__bridge NSArray*)ABAddressBookCopyArrayOfAllPeople(ab);
+        ABRecordRef source = ABAddressBookCopyDefaultSource(ab);
+        _people = (__bridge NSArray *)(ABAddressBookCopyArrayOfAllPeopleInSourceWithSortOrdering(ab, source, kABPersonSortByFirstName));
+        
         [self logPeople];
         // Inspired from http://developer.apple.com/library/ios/#documentation/ContactData/Conceptual/AddressBookProgrammingGuideforiPhone/Chapters/DirectInteraction.html#//apple_ref/doc/uid/TP40007744-CH6-SW1
         NSPredicate* predicate = [NSPredicate predicateWithBlock: ^(id record, NSDictionary* bindings) {
@@ -184,18 +186,6 @@
             return result;
         }];
         _people = [_people filteredArrayUsingPredicate:predicate];
-        
-        // Sorting. We might make this an option or only sort if there is less than X contacts...
-        _people = [_people sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
-            CFStringRef obj1CF = ABRecordCopyCompositeName((__bridge ABRecordRef) obj1);
-            NSString* obj1String = (__bridge NSString*)obj1CF;
-            CFStringRef obj2CF = ABRecordCopyCompositeName((__bridge ABRecordRef) obj2);
-            NSString* obj2String = (__bridge NSString*)obj2CF;
-            NSComparisonResult comparisonResult = [obj1String compare:obj2String];
-            CFRelease(obj1CF);
-            CFRelease(obj2CF);
-            return comparisonResult;
-        }];
         [self logPeople];
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.tableView reloadData];
