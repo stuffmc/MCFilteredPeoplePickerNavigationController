@@ -104,7 +104,9 @@
         ABRecordRef record = (__bridge ABRecordRef)(array[indexPath.row]);
         CFStringRef compositeName = ABRecordCopyCompositeName(record);
         cell.textLabel.text = (__bridge NSString *)(compositeName);
-        CFRelease(compositeName);
+        if (compositeName) {
+            CFRelease(compositeName);
+        }
     } else {
         cell.textLabel.text = @""; // This shouldn't happen, but if it does, at least we don't crash.
     }
@@ -175,18 +177,29 @@
 {
     dispatch_async(dispatch_queue_create("biz.pomcast.mcfilteredppnc.loading", NULL), ^{
         ABRecordRef source = ABAddressBookCopyDefaultSource(ab);
-        _people = (__bridge NSArray *)(ABAddressBookCopyArrayOfAllPeopleInSourceWithSortOrdering(ab, source, kABPersonSortByFirstName));
-        
-        [self logPeople];
-        // Inspired from http://developer.apple.com/library/ios/#documentation/ContactData/Conceptual/AddressBookProgrammingGuideforiPhone/Chapters/DirectInteraction.html#//apple_ref/doc/uid/TP40007744-CH6-SW1
-        NSPredicate* predicate = [NSPredicate predicateWithBlock: ^(id record, NSDictionary* bindings) {
-            ABMultiValueRef multiValue = ABRecordCopyValue((__bridge ABRecordRef)record, kABPersonAddressProperty);
-            BOOL result = ABMultiValueGetCount(multiValue) > 0 ? YES : NO;
-            CFRelease(multiValue);
-            return result;
-        }];
-        _people = [_people filteredArrayUsingPredicate:predicate];
-        [self logPeople];
+        if (source) {
+            _people = (__bridge NSArray *)(ABAddressBookCopyArrayOfAllPeopleInSourceWithSortOrdering(ab, source, kABPersonSortByFirstName));
+            CFRelease(source);
+            
+            [self logPeople];
+            // Inspired from http://developer.apple.com/library/ios/#documentation/ContactData/Conceptual/AddressBookProgrammingGuideforiPhone/Chapters/DirectInteraction.html#//apple_ref/doc/uid/TP40007744-CH6-SW1
+            NSPredicate* predicate = [NSPredicate predicateWithBlock: ^(id record, NSDictionary* bindings) {
+                ABRecordRef recordRef = (__bridge ABRecordRef)record;
+                ABMultiValueRef multiValue = ABRecordCopyValue(recordRef, kABPersonAddressProperty);
+                BOOL isValid = ABMultiValueGetCount(multiValue) > 0 ? YES : NO;
+                CFRelease(multiValue);
+                CFStringRef name = ABRecordCopyCompositeName(recordRef);
+                isValid = isValid && name;
+                if (name) {
+                    CFRelease(name);
+                }
+                return isValid;
+            }];
+            _people = [_people filteredArrayUsingPredicate:predicate];
+            [self logPeople];
+        } else {
+            _people = [NSArray array]; // Hint to the developer.
+        }
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.tableView reloadData];
             self.title = NSLocalizedString(@"contacts", @"The title 'Contacts' on top of the Table View once the contacts have been loaded");
@@ -217,7 +230,9 @@
         NSRange range = [(__bridge NSString *)compositeNameRef rangeOfString:searchString
                                                                      options:NSCaseInsensitiveSearch | NSDiacriticInsensitiveSearch];
         BOOL result = range.location != NSNotFound;
-        CFRelease(compositeNameRef);
+        if (compositeNameRef) {
+            CFRelease(compositeNameRef);
+        }
         return result;
     }];
     _searchedPeople = [_people filteredArrayUsingPredicate:predicate];
