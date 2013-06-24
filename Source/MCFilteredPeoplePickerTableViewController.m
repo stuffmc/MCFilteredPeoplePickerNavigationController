@@ -101,9 +101,10 @@
     }
     NSArray *array = [self arrayForTableView:tableView];
     if (array.count > indexPath.row) {
-        ABRecordRef record = (__bridge ABRecordRef)(array[indexPath.row]);
+        ABRecordRef record = (__bridge_retained ABRecordRef)(array[indexPath.row]);
         CFStringRef compositeName = ABRecordCopyCompositeName(record);
         cell.textLabel.text = (__bridge NSString *)(compositeName);
+        CFRelease(record);
         if (compositeName) {
             CFRelease(compositeName);
         }
@@ -178,7 +179,7 @@
     dispatch_async(dispatch_queue_create("biz.pomcast.mcfilteredppnc.loading", NULL), ^{
         ABRecordRef source = ABAddressBookCopyDefaultSource(ab);
         if (source) {
-            _people = (__bridge NSArray *)(ABAddressBookCopyArrayOfAllPeopleInSourceWithSortOrdering(ab, source, kABPersonSortByFirstName));
+            _people = (__bridge_transfer NSArray *)(ABAddressBookCopyArrayOfAllPeopleInSourceWithSortOrdering(ab, source, kABPersonSortByFirstName));
             CFRelease(source);
             
             [self logPeople];
@@ -212,7 +213,7 @@
 #ifdef DEBUG
 #if 0 && TARGET_IPHONE_SIMULATOR
     [_people enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        DLogV((__bridge NSString*)ABRecordCopyCompositeName((__bridge ABRecordRef)(_people[idx])));
+        DLogV((__bridge_transfer NSString*)ABRecordCopyCompositeName((__bridge ABRecordRef)(_people[idx])));
     }];
 #endif
 #endif
